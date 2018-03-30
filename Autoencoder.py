@@ -156,11 +156,13 @@ class Autoencoder(object):
             if np.mod(counter, 2) == 0:
                 self.save(self.checkpoint_dir, counter)
             counter += 1
-
+        #Generate training reps
         self.test(self.training_data, "data_train", self.cancer_training_size)
+        #Generate testing  reps
         self.test(self.testing_data, "data_test", self.cancer_testing_size)
         if self.generate:
             self.PSO_optimizer(self.training_data, self.cancer_training_size, self.sess)
+            
 
     def encoder(self, x):
         layer = x
