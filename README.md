@@ -5,9 +5,9 @@ python3
 tensorflow v1.5+
 pandas
 
-# Project Title
 
-One Paragraph of project description goes here
+
+This project generates synthetic minority class samples using a trained  autencoder and Particle Sawarm optimization (PSO) algorithm
 
 ## Getting Started
 
@@ -15,8 +15,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
+To use the project you need
+* python3
+* tensorflow v1.4+
+* pandas
+* numpy
 ```
 Give examples
 ```
