@@ -32,12 +32,16 @@ def main(_):
     # define and load the data
     dataset_name = FLAGS.dataset
     class_index=FLAGS.class_index
-    data_loader=DataLoader(dataset_name,class_index,FLAGS.train)
+    try:
+     data_loader=DataLoader(dataset_name,class_index,FLAGS.train)
 
 
-    # start training
-    train_data(dataset_name,data_loader.data_train, data_loader.data_test, 1, data_loader.cancer_training_size, data_loader.cancer_testing_size) #1: only one run
-    print("[****]Done Run :", 1)
+     # start training
+
+     train_data(dataset_name,data_loader.data_train, data_loader.data_test, 1, data_loader.cancer_training_size, data_loader.cancer_testing_size) #1: only one run
+     print("[****]Done Run :", 1)
+    except Exception as e:
+        print(e)
 
 
 

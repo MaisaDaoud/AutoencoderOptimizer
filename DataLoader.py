@@ -27,91 +27,91 @@ class DataLoader(object):
           for row in dataset_file:
                 try:
                     data.append(np.float32(row))
-                   
+
                 except (TypeError , ValueError) as e:
                     print(e)
-                   
-      except FileNotFoundError:
-          print("File",os.path.join(os.getcwd(),data,dataset+".csv")," Not Found")
 
-      dataset = np.array(data)
-      print("[*] Dataset shape : ", dataset.shape)
-      #dataset = dataset.transpose()
 
-      # count the number of clases
-      class_list = list(set(dataset[:, class_index]))
-      print("[*] Data classes are : ", class_list)
+          dataset = np.array(data)
+          print("[*] Dataset shape : ", dataset.shape)
+          #dataset = dataset.transpose()
 
-      # separate to cancer_dataset and normal_dataset
-      cancer_dataset = []
-      normal_dataset = []
+          # count the number of clases
+          class_list = list(set(dataset[:, class_index]))
+          print("[*] Data classes are : ", class_list)
 
-      if class_index < 0:
-          class_index = len(dataset[0]) + class_index
+          # separate to cancer_dataset and normal_dataset
+          cancer_dataset = []
+          normal_dataset = []
 
-      for i in range(0, dataset.shape[0]):
-          item = pd.DataFrame(dataset[i]).drop(index=class_index)  # remove the class lable from the data
+          if class_index < 0:
+              class_index = len(dataset[0]) + class_index
 
-          if dataset[i, class_index] == class_list[0]:
+          for i in range(0, dataset.shape[0]):
+              item = pd.DataFrame(dataset[i]).drop(index=class_index)  # remove the class lable from the data
 
-              cancer_dataset.append(item.values.reshape(item.shape[0]))
+              if dataset[i, class_index] == class_list[0]:
 
+                  cancer_dataset.append(item.values.reshape(item.shape[0]))
+
+              else:
+                  normal_dataset.append(item.values.reshape(item.shape[0]))
+
+          print("[*] Cancer dataset shape = ", np.shape(cancer_dataset))
+          print("[*] Normal dataset shape = ", np.shape(normal_dataset))
+
+
+          #case 1:  if the model is used for training
+          if train:
+              # TODO uses different split vals than .8'
+              cancer_training_size = np.int(len(cancer_dataset) * .8)
+              cancer_testing_size = len(cancer_dataset) - cancer_training_size
+              print("[*] Number of Samples in cancer_dataset: ", len(cancer_dataset), " training=", cancer_training_size,
+                    " testing=",
+                    cancer_testing_size)
+              # normal dataset
+              normal_training_size = np.int(len(normal_dataset) * .8)
+              normal_testing_size = len(normal_dataset) - normal_training_size
+
+              print("[*] Number of Samples in normal_dataset: ", len(normal_dataset), " training=", normal_training_size,
+                    " testing=",
+                    normal_testing_size)
+
+              # choosing random samples for training and testing files from cancer and test data
+              cancer_training_dataset, cancer_testing_dataset = self.chooseRandom(cancer_dataset, cancer_training_size,
+                                                                                  cancer_testing_size)
+              normal_training_dataset, normal_testing_dataset =self. chooseRandom(normal_dataset, normal_training_size,
+                                                                                  normal_testing_size)
+
+              # prepare for training: Stack the cancer and normal samples
+              self.data_train = np.vstack((cancer_training_dataset, normal_training_dataset))
+              self.data_test = np.vstack((cancer_testing_dataset, normal_testing_dataset))
+              self.cancer_training_size=len(cancer_training_dataset)
+              self.cancer_testing_size = len(cancer_testing_dataset)
+              #print("[*] cancer trainign size = ", self.cancer_training_size)
+              #print("[*] cancer testing size = ", self.cancer_testing_size)
+
+              dir= os.path.join("Representations",self.dataset_name)
+              if not os.path.exists(dir):
+                  os.makedirs(dir)
+
+
+              np.savetxt(os.path.join(dir,"train_data.csv"),self. data_train, delimiter=",")
+              np.savetxt(os.path.join(dir,"test_data.csv"), self.data_test, delimiter=",")
+
+
+              #case 2: if the model id used for testing
           else:
-              normal_dataset.append(item.values.reshape(item.shape[0]))
 
-      print("[*] Cancer dataset shape = ", np.shape(cancer_dataset))
-      print("[*] Normal dataset shape = ", np.shape(normal_dataset))
+              self.data_train = None
+              cancer_testing_dataset= np.array(cancer_dataset)
+              normal_testing_dataset=np.array(normal_dataset)
+              self.data_test = np.vstack((cancer_testing_dataset, normal_testing_dataset))
+              self.cancer_training_size = 0
+              self.cancer_testing_size = len(cancer_dataset)
 
-      
-      #case 1:  if the model is used for training
-      if train:
-          # TODO uses different split vals than .8'
-          cancer_training_size = np.int(len(cancer_dataset) * .8)
-          cancer_testing_size = len(cancer_dataset) - cancer_training_size
-          print("[*] Number of Samples in cancer_dataset: ", len(cancer_dataset), " training=", cancer_training_size,
-                " testing=",
-                cancer_testing_size)
-          # normal dataset
-          normal_training_size = np.int(len(normal_dataset) * .8)
-          normal_testing_size = len(normal_dataset) - normal_training_size
-
-          print("[*] Number of Samples in normal_dataset: ", len(normal_dataset), " training=", normal_training_size,
-                " testing=",
-                normal_testing_size)
-
-          # choosing random samples for training and testing files from cancer and test data
-          cancer_training_dataset, cancer_testing_dataset = self.chooseRandom(cancer_dataset, cancer_training_size,
-                                                                              cancer_testing_size)
-          normal_training_dataset, normal_testing_dataset =self. chooseRandom(normal_dataset, normal_training_size,
-                                                                              normal_testing_size)
-
-          # prepare for training: Stack the cancer and normal samples
-          self.data_train = np.vstack((cancer_training_dataset, normal_training_dataset))
-          self.data_test = np.vstack((cancer_testing_dataset, normal_testing_dataset))
-          self.cancer_training_size=len(cancer_training_dataset)
-          self.cancer_testing_size = len(cancer_testing_dataset)
-          #print("[*] cancer trainign size = ", self.cancer_training_size)
-          #print("[*] cancer testing size = ", self.cancer_testing_size)
-
-          dir= os.path.join("Representations",self.dataset_name)
-          if not os.path.exists(dir):
-              os.makedirs(dir)
-
-
-          np.savetxt(os.path.join(dir,"train_data.csv"),self. data_train, delimiter=",")
-          np.savetxt(os.path.join(dir,"test_data.csv"), self.data_test, delimiter=",")
-          
-          
-          #case 2: if the model id used for testing
-      else:
-
-          self.data_train = None
-          cancer_testing_dataset= np.array(cancer_dataset)
-          normal_testing_dataset=np.array(normal_dataset)
-          self.data_test = np.vstack((cancer_testing_dataset, normal_testing_dataset))
-          self.cancer_training_size = 0
-          self.cancer_testing_size = len(cancer_dataset)
-
+      except FileNotFoundError:
+          print("File", os.path.join(os.getcwd(), "data", dataset + ".csv"), " Not Found")
 
   def chooseRandom(self,data, train_Size, test_Size):
       item = range(0, len(data))
