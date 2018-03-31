@@ -20,7 +20,8 @@ class Autoencoder(object):
         self.epochs = epochs
         self.dataset_name = dataset_name
         self.learning_rate = learning_rate
-        self.n_layers = n_layers
+        self.n_layers = [int(float(n_layers[x])) for x in range (0,len(n_layers))]
+        print("self.n_layers", self.n_layers)
         self.run = run
         self.sess = sess
         self.testing_data = testing_data
@@ -162,7 +163,7 @@ class Autoencoder(object):
         self.test(self.testing_data, "data_test", self.cancer_testing_size)
         if self.generate:
             self.PSO_optimizer(self.training_data, self.cancer_training_size, self.sess)
-            
+
 
     def encoder(self, x):
         layer = x

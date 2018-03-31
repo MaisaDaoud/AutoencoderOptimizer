@@ -18,7 +18,7 @@ class DataLoader(object):
       data=[]
       try:
 
-          dataset_file = csv.reader(open(os.getcwd() + "\\data\\" + dataset + ".csv", 'r'), quoting=csv.QUOTE_NONNUMERIC)
+          dataset_file = csv.reader(open(os.path.join(os.getcwd(),"data", dataset + ".csv"), 'r'), quoting=csv.QUOTE_NONNUMERIC)
           #str(dataset_file).encode("utf-8").decode("ascii")
           #data = pd.read_csv(filepath_or_buffer=os.getcwd() + "\\data\\" + dataset + ".csv", header=None, dtype={ 'my_column': np.float64 },  na_values=['n/a'])
 
@@ -32,7 +32,7 @@ class DataLoader(object):
                     print(e)
                    
       except FileNotFoundError:
-          print("File Not Found")
+          print("File",os.path.join(os.getcwd(),data,dataset+".csv")," Not Found")
 
       dataset = np.array(data)
       print("[*] Dataset shape : ", dataset.shape)
