@@ -22,7 +22,7 @@ flags.DEFINE_integer("class_index", -1, "class index")
 
 FLAGS = flags.FLAGS
 """
-    tensorflow implementation of SDA and PSO.
+    tensorflow implementation for SDA and PSO.
     
     Usage : see README.md
 """
