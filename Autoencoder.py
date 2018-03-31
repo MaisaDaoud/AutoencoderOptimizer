@@ -13,7 +13,8 @@ class Autoencoder(object):
     def __init__(self, sess, epochs=1, run=1, learning_rate=0.001, batch_size=100, n_layers=2,
                  checkpoint_dir="checkpoint",
                  training_data="data_train", cancer_training_size=1, cacner_testing_size=1, testing_data="data_test",
-                 train=True, dataset_name="READ", generate=False):
+                 train=True, dataset_name="READ", generate=False,
+                 s_number=20):
 
         self.batch_size = batch_size
         self.checkpoint_dir = os.path.join(checkpoint_dir, dataset_name)
@@ -35,6 +36,7 @@ class Autoencoder(object):
             print("self.trainning size=", self.training_size)
             self.cancer_training_size = cancer_training_size
         self.generate = generate
+        self.s_number=s_number
         # define the layers
 
         self.weights, self.baiases = self.initialize_layers(self.n_layers, self.input_length, self.output_length)
@@ -95,8 +97,7 @@ class Autoencoder(object):
             self.training()  # training_samples)
         else:
             self.test(self.testing_data, "testing_reps", self.cancer_testing_size)
-        if (self.generate):
-            self.PSO_optimizer(self.testing_data, self.cancer_testing_size, self.sess)
+
 
     def training(self):
         X = tf.placeholder('float', [None, self.input_length])
@@ -213,6 +214,8 @@ class Autoencoder(object):
             reps = np.hstack((reps, class_att))
             np.savetxt(os.path.join(file_dir, "{}_{}".format(name, "reps.csv")), np.transpose(reps, (0, 1)),
                        delimiter=",")
+            if (self.generate):
+                self.PSO_optimizer(self.testing_data, self.cancer_testing_size, self.sess)
         else:
             print(" [!] Load failed...")
 
@@ -231,8 +234,7 @@ class Autoencoder(object):
         lb = 0 * (np.ones((rep_length)).astype(np.float64))  # [10, 1, 0.01]
         ub = (np.ones((rep_length)).astype(np.float64))  # [10, 1, 0.01]
         normal_size = len(data_samples) - cancer_size
-        replication = np.int(
-            cancer_size / normal_size + 1) * normal_size  # replication=(np.int(cancer_size/normal_size)+1)*normal_size)
+        replication = self.s_number #np.int(cancer_size / normal_size + 1) * normal_size  # replication=(np.int(cancer_size/normal_size)+1)*normal_size)
         collection = np.zeros([replication, rep_length])  # self.n_input])#np.empty([128, 784])
         collection2 = np.zeros([replication, rep_length])  # self.n_input])#np.empty([128, 784])
         samplesLoss2 = np.zeros([replication])
@@ -251,8 +253,15 @@ class Autoencoder(object):
             weights['decoder_h' + str(l + 1)] = self.weights['decoder_h' + str(l + 1)].eval(sess)
             baiases['decoder_b' + str(l + 1)] = self.baiases['decoder_b' + str(l + 1)].eval(sess)
         f = 0
-        for idx1 in range(cancer_size // normal_size + 1):
-            for idx in range(normal_size):
+
+        if self.s_number < normal_size:
+            samples_number=self.s_number
+            round=1
+        else:
+            samples_number= normal_size
+            round=self.s_number//normal_size +1
+        for idx1 in range(round): #cancer_size // normal_size + 1):
+            for idx in range(samples_number):#normal_size):
                 print("round ", idx1, "samples", idx)
                 global index
                 index = idx

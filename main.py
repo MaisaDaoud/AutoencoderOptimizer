@@ -17,6 +17,7 @@ flags.DEFINE_string("checkpoint_dir","checkpoint","checkpoint drectory")
 flags.DEFINE_string("dataset", "THCA", "dataset file name")
 flags.DEFINE_boolean("train", True, "true to train , false to test the model")
 flags.DEFINE_boolean("generate",False,"true to generate synthetic minority samples")
+flags.DEFINE_integer("s_number",20,"number of synthetic minority samples to generate")
 flags.DEFINE_list("n_layers", [1000,50,20], "# of neurons /layer in the encoder side")
 flags.DEFINE_integer("class_index", -1, "class index")
 
@@ -64,7 +65,8 @@ def train_data (dataset_name,training_data, testing_data, run, cancer_training_s
         testing_data=testing_data,
         checkpoint_dir=FLAGS.checkpoint_dir,
         train=FLAGS.train,
-        generate=FLAGS.generate)
+        generate=FLAGS.generate,
+        s_number=FLAGS.s_number)
     sess.close()
 
 
