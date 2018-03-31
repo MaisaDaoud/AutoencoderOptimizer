@@ -21,10 +21,16 @@ flags.DEFINE_list("n_layers", [1000,50,20], "# of neurons /layer in the encoder 
 flags.DEFINE_integer("class_index", -1, "class index")
 
 FLAGS = flags.FLAGS
+"""
+    tensorflow implementation of SDA and PSO.
+    
+    Usage : see README.md
+"""
 
 
 def main(_):
-    # ... printing the flags ....
+    
+    #  printing the flags 
     pp=pprint.PrettyPrinter()
     pp.pprint(flags.FLAGS.__flags)
 
