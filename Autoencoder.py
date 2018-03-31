@@ -105,8 +105,8 @@ class Autoencoder(object):
 
         # TODO implement other cost and optimizers
         cost = tf.reduce_mean(tf.pow(self.d - X, 2))
-        optimizer1 = tf.train.AdamOptimizer(self.learning_rate).minimize(cost)
-        optimizer2 = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cost)
+
+        optimizer = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cost)
         # Initializing the variables
         try:
             tf.global_variables_initializer().run(session=self.sess)
@@ -139,15 +139,8 @@ class Autoencoder(object):
             for idx in xrange(batch_idxs):
                 batch_samples = self.training_data[
                                 idx * self.batch_size:(idx + 1) * self.batch_size]  # np.array(batch).astype(np.float32)
-                '''
-                if epoch / 2 == 0:
-                    optimizer = optimizer2
-                # print("[***] patch samples shape = ",batch_samples.shape)
-                
-                else :
-                    optimizer=optimizer1
-                '''
-                optimizer = optimizer1
+
+
                 _, c = self.sess.run([optimizer, cost], feed_dict={
                     X: self.mask_noise(np.reshape(batch_samples, [self.batch_size, self.input_length]), 20)})
 

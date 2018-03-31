@@ -25,9 +25,9 @@ FLAGS = flags.FLAGS
 
 def main(_):
     # ... printing the flags ....
-    pp=pprint.PrettyPrinter()
-    pp.pprint(flags.FLAGS.__flags)
-
+    #pp=pprint.PrettyPrinter()
+    #pp.pprint(flags.FLAGS.__flags)
+    #FLAGS.__dict__['__flags']
 
     # define and load the data
     dataset_name = FLAGS.dataset
