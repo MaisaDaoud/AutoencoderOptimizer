@@ -25,7 +25,7 @@ Clone or Download the project and use one of the following commands
 python3 main.py --dataset="THCA" --train=True --generate=False --epochs=4 n_layers=1000,500
 ```
 * After training, The model is saved in the checkpoint/XXX directory. The generated representations for both training and testing data are found in Representations/XXX/Autoencoder folder  (xxx=dataset)
-
+* The program reads .csv file with the name XXX from the data folder
 * see main.py for other training parameters.
 
 
