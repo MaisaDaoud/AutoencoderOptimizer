@@ -9,12 +9,14 @@ from Autoencoder import Autoencoder
 from DataLoader import DataLoader
 import pandas as pd
 
+
 flags = tf.app.flags
 flags.DEFINE_integer("epochs", 10, "number of training epochs")
 flags.DEFINE_float("learning_rate", 0.0001, "learning rate")
 flags.DEFINE_integer("batch_size", 25, "number of samples/batch")
 flags.DEFINE_string("checkpoint_dir","checkpoint","checkpoint drectory")
 flags.DEFINE_string("dataset", "THCA", "dataset file name")
+flags.DEFINE_float("split",0.8," the  percentage of the training data ")
 flags.DEFINE_boolean("train", True, "true to train , false to test the model")
 flags.DEFINE_boolean("generate",False,"true to generate synthetic minority samples")
 flags.DEFINE_integer("s_number",20,"number of synthetic minority samples to generate")
@@ -25,6 +27,8 @@ FLAGS = flags.FLAGS
 
 
 def main(_):
+
+
     # ... printing the flags ....
     pp=pprint.PrettyPrinter()
     pp.pprint(flags.FLAGS.__flags)
@@ -34,7 +38,7 @@ def main(_):
     dataset_name = FLAGS.dataset
     class_index=FLAGS.class_index
     try:
-     data_loader=DataLoader(dataset_name,class_index,FLAGS.train)
+     data_loader=DataLoader(dataset_name,class_index,FLAGS.train,FLAGS.split)
 
 
      # start training

@@ -4,15 +4,34 @@ import numpy as np
 import pandas as pd
 
 class DataLoader(object):
-  def __init__(self,dataset_name="",class_index=-1,train=True):
+
+  def __init__(self,dataset_name="",class_index=-1,train=True,split=0.8):
+
+        """
+          Initialize  a data loader object to load a *.csv dataset file from data folder
+
+
+          :param dataset_name: string, the name of the dataset file
+          :param class_index: int, the index of the class lables, -1 is default
+          :param train: boolean
+          :param  split: float, the percentage of train:data split
+
+          :returns
+
+          -Two lists (training and testing) if train=True, both lists are written to .csv files
+          -one list (testing) if train=False
+
+
+        """
 
         self.dataset_name=dataset_name
         self.class_index=class_index
         self.train=train
+        self.split=split
         # call load_data methof
-        self. load_data(self.dataset_name,self.class_index,self.train)
+        self. load_data(self.dataset_name,self.class_index,self.train,split)
 
-  def load_data(self,dataset, class_index,train):
+  def load_data(self,dataset, class_index,train,split):
 
       # read the data
       data=[]
@@ -40,7 +59,7 @@ class DataLoader(object):
           class_list = list(set(dataset[:, class_index]))
           print("[*] Data classes are : ", class_list)
 
-          # separate to cancer_dataset and normal_dataset
+          # separating the dataset into to cancer_dataset and normal_dataset
           cancer_dataset = []
           normal_dataset = []
 
@@ -64,7 +83,7 @@ class DataLoader(object):
           #case 1:  if the model is used for training
           if train:
               # TODO uses different split vals than .8'
-              cancer_training_size = np.int(len(cancer_dataset) * .8)
+              cancer_training_size = np.int(len(cancer_dataset) * split)
               cancer_testing_size = len(cancer_dataset) - cancer_training_size
               print("[*] Number of Samples in cancer_dataset: ", len(cancer_dataset), " training=", cancer_training_size,
                     " testing=",

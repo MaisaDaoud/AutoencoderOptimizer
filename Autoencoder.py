@@ -16,6 +16,26 @@ class Autoencoder(object):
                  train=True, dataset_name="READ", generate=False,
                  s_number=20):
 
+        """
+        :param sess: session
+        :param epochs: int, num training epohcs
+        :param run: 1
+        :param learning_rate: float
+        :param batch_size:int
+        :param n_layers: :int, number of layers in the encoder side
+        :param checkpoint_dir: the name of the checkpoint directory
+        :param training_data:list, training_data
+        :param cancer_training_size: int, the size of training cancer data
+        :param cacner_testing_size: int, the size of testing cancer data
+        :param testing_data: int
+        :param train: boolean
+        :param dataset_name: the name of the dataset file
+        :param generate: boolean, True to generate synthetic representations
+        :param s_number: int, number of samples to generate
+
+
+        """
+
         self.batch_size = batch_size
         self.checkpoint_dir = os.path.join(checkpoint_dir, dataset_name)
         self.epochs = epochs
@@ -40,17 +60,12 @@ class Autoencoder(object):
         # define the layers
 
         self.weights, self.baiases = self.initialize_layers(self.n_layers, self.input_length, self.output_length)
-        '''
-        self.layers= self.initialize_layers(self.n_layers,self.input_length,self.output_length)
-   
-        for i in (0,len(self.layers)):
-         print("weights = ",self.layers[i].weights, "bias = ",self.layers[i].bias)
-        '''
+
 
         self.build_model()
 
     def initialize_layers(self, n_layers, input_length, output_length):
-
+        """ initialize the  layers """
         weights = {}
         biases = {}
         # encoder weights and biases
@@ -90,7 +105,7 @@ class Autoencoder(object):
     '''
 
     def build_model(self):
-
+        """ build the models"""
         self.saver = tf.train.Saver()
         if (self.train):
 
@@ -100,6 +115,7 @@ class Autoencoder(object):
 
 
     def training(self):
+        """ train the model"""
         X = tf.placeholder('float', [None, self.input_length])
         self.e = self.encoder(X)
         self.d = self.decoder(self.e)
@@ -160,6 +176,7 @@ class Autoencoder(object):
 
 
     def encoder(self, x):
+        """ encoding """
         layer = x
 
         for l in xrange(0, len(self.n_layers)):
@@ -171,6 +188,7 @@ class Autoencoder(object):
         return layer
 
     def decoder(self, x):
+        """ decoding """
         layer = x
         for l in xrange(0, len(self.n_layers)):
             name_w = "decoder_h" + str(l + 1)
@@ -180,6 +198,14 @@ class Autoencoder(object):
         return layer
 
     def test(self, data, name, cancer_training_size):
+        """
+        generate testing representations, the file is written at
+        Representations/dataset_name/Autoencoder/data_test_reps.csv
+
+        representations for training data (if train=True) is generated at
+        Representations/dataset_name/Autoencoder/data_train_reps.csv
+
+        """
         X = tf.placeholder('float', [None, self.input_length])
         self.e = self.encoder(X)
         self.d = self.decoder(self.e)
@@ -220,6 +246,10 @@ class Autoencoder(object):
             print(" [!] Load failed...")
 
     def PSO_optimizer(self, data_samples, cancer_size, sess):
+        """
+        generate minority samples, a file of the generated samples is written in
+         Representations/dataset_name/optimized_reps.csv
+        """
         # load the model
         could_load = self.load(self.checkpoint_dir,"generating new data")
         if could_load:
@@ -268,7 +298,7 @@ class Autoencoder(object):
                 original_sample = data_samples[idx + cancer_size]
                 # print("[*]index = .......................",index)
                 args = (original_sample, rep_length, weights, baiases)
-                xopt, fopt = pso(self.fitness, lb, ub, swarmsize=4, maxiter=1, args=args)  # 300 , 2
+                xopt, fopt = pso(self.fitness, lb, ub, swarmsize=4, maxiter=1, args=args)
                 optimized_code = xopt.reshape((1, rep_length))
                 optimized_reps = optimized_code  # self.sess.run(y_opt, feed_dict={optimized_x:optimized_code }) #batch_size
                 samplesLoss2[f] = fopt
@@ -284,6 +314,7 @@ class Autoencoder(object):
         np.savetxt(os.path.join(file_dir, "{}_{}".format("optimized_", "reps.csv")), collection, delimiter=",")
 
     def fitness(self, x, *args):
+        """ calculate PSO's particles fitness """
 
         original_sample, rep_length, weights, biases = args
         l = x
@@ -302,8 +333,9 @@ class Autoencoder(object):
 
         return tf.random_uniform((nin, nout), minval=low, maxval=high)
 
-    # Noising Method
+
     def mask_noise(self, x, v):
+        """ add salt-and-pepper noise to the data"""
         x_noise = x.copy()
 
         n_samples = x.shape[0]
@@ -319,11 +351,12 @@ class Autoencoder(object):
 
     @property
     def model_dir(self):
-
+        """ the name of the  directory """
         return "{}_{}_{}_{}_{}".format(
             "dataset_train", self.batch_size, self.input_length, self.output_length, self.run)
 
     def save(self, checkpoint_dir, step):
+        """ save the trained model """
         model_name = "Autoencoder.model"
         checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
 
@@ -334,7 +367,7 @@ class Autoencoder(object):
                         os.path.join(checkpoint_dir, model_name))
 
     def load(self, checkpoint_dir, phase):
-        import re
+        """ load a previously trined model """
 
         print("[*] Reading checkpoints for", phase)
         checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
@@ -347,7 +380,7 @@ class Autoencoder(object):
 
                 self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
 
-                # print(" [*] Success to read {}".format(ckpt_name))
+
                 return True
             except:
                 print("[!] Deleting the pre-trained model, it has different config.")
